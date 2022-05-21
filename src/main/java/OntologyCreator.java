@@ -3,6 +3,8 @@ import org.apache.jena.ontology.ObjectProperty;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.sparql.function.library.print;
+import org.apache.jena.tdb.sys.SystemTDB;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.*;
 import org.apache.jena.vocabulary.OWL2;
@@ -52,47 +54,45 @@ public class OntologyCreator {
         journal.addRDFType(OWL2.NamedIndividual);
     }
 
-    private static void addConferences() throws FileNotFoundException {
+    private static void addConferences(String[] chairs) throws FileNotFoundException {
         Scanner sc = new Scanner(new File(basePath + "\\processed_data\\conferences.csv"));
         sc.useDelimiter(";");
         sc.nextLine();
+        
         while (sc.hasNext()) {
+        	
             String confName = sc.nextLine().split(";")[0];
             confName = cleanStrings(confName);
 
-//            Resource venueRes = model.getResource("http://www.gra.fo/schema/untitled-ekg#Venue");
-//            Individual venue = model.createIndividual("http://www.gra.fo/schema/untitled-ekg#" + confName , venueRes);
-//            venue.addRDFType(OWL2.NamedIndividual);
-//
-//            Resource conferenceRes = model.getResource("http://www.gra.fo/schema/untitled-ekg#Conference");
-//            Individual conference = model.createIndividual("http://www.gra.fo/schema/untitled-ekg#" + confName , conferenceRes);
-//            conference.addRDFType(OWL2.NamedIndividual);
-
-            String[] confTypes = {"Workshop", "Symposium", "ExpertGroup", "RegularConference"};
-
-            Resource confTypeRes = model.getResource(URI + confTypes[rand.nextInt(4)]);
-            Individual confType = model.createIndividual(URI + confName , confTypeRes);
-            confType.addRDFType(OWL2.NamedIndividual);
+            String[] confTypes = {"Workshop", "Symposium", "ExpertGroup", "RegularConference"};           
+            Individual confType =  GetOrCreateIndividual(confTypes[rand.nextInt(4)], confName);
+            
+            Individual chair =  GetOrCreateIndividual("Chair", chairs[rand.nextInt(5)]);
+            
+            ObjectProperty handledBy = model.getObjectProperty(URI + "handledby");
+            model.add(confType,handledBy,chair);
         }
+        
         sc.close();
     }
 
-    private static void addJournals() throws FileNotFoundException {
+    private static void addJournals(String[] editors) throws FileNotFoundException {
         Scanner sc = new Scanner(new File(basePath + "\\processed_data\\journals.csv"));
         sc.useDelimiter(";");
         sc.nextLine();
+        
         while (sc.hasNext()) {
             String journalName = sc.nextLine().split(";")[0];
             journalName = cleanStrings(journalName);
-
-//            Resource venueRes = model.getResource("http://www.gra.fo/schema/untitled-ekg#Venue");
-//            Individual venue = model.createIndividual("http://www.gra.fo/schema/untitled-ekg#" + confName , venueRes);
-//            venue.addRDFType(OWL2.NamedIndividual);
-
-            Resource journalRes = model.getResource(URI + "Journal");
-            Individual journal = model.createIndividual(URI + journalName , journalRes);
-            journal.addRDFType(OWL2.NamedIndividual);
+           
+            Individual journal = GetOrCreateIndividual("Journal", journalName);
+            
+            Individual editor =  GetOrCreateIndividual("Chair", editors[rand.nextInt(5)]);
+            
+            ObjectProperty handledBy = model.getObjectProperty(URI + "handledby");
+            model.add(journal,handledBy,editor);
         }
+        
         sc.close();
     }
 
@@ -120,6 +120,7 @@ public class OntologyCreator {
                 createConference(conference);
                 conferenceInd = model.getIndividual( URI + conference);
             }
+            
             model.add(confProc,p,conferenceInd);
         }
         sc.close();
@@ -166,12 +167,20 @@ public class OntologyCreator {
         while (sc.hasNext()) {
             String[] values = sc.nextLine().split(";");
             String key = cleanStrings(values[0]);
-            String title = cleanStrings(values[1]);
             
-            String venueName = cleanStrings(values[3]);
-            String number = cleanStrings(values[4]);
+            String venueName = cleanStrings(values[4]);
             
-            String reviewers = cleanStrings(values[7]);
+            String number = cleanStrings(values[5]); 
+            
+            String reviewers = "";
+            
+            if (venue != "Journal") {
+            	reviewers = cleanStrings(values[7]);
+    		}
+            else
+            {
+            	reviewers = cleanStrings(values[8]);
+            }
 
             List<String> paperTypes = Arrays.asList("ShortPaper", "FullPaper", "DemoPaper");
             
@@ -191,7 +200,7 @@ public class OntologyCreator {
             
             // Reviewers Node
             if (!reviewers.isEmpty()) {			
-	            String[] reviewersValues = reviewers.split("|");
+	            String[] reviewersValues = reviewers.split("\\|");
 	            
 	            String  reviewer1 = reviewersValues[0];
 	            String  reviewer2 = reviewersValues[1];
@@ -232,10 +241,10 @@ public class OntologyCreator {
 	            Individual venueInd = null;
 	            
 	            if (venue != "Journal") {
-	            	venueInd = GetOrCreateIndividual(venue, venueName);
+	            	venueInd = GetOrCreateIndividualConference(venueName);
 	    		}
 	            else {
-	            	venueInd = GetOrCreateIndividualConference(venueName);
+	            	venueInd = GetOrCreateIndividual(venue, venueName);
 				}
 	            
 	            model.add(submissionInd,sendTo,venueInd);	            
@@ -243,10 +252,10 @@ public class OntologyCreator {
 	            Individual numberInd = null;
 	            		
 	            if (venue != "Journal") {
-	        		numberInd = GetOrCreateIndividual("JournalVolume", venueName + "_" + number);
+	            	numberInd = GetOrCreateIndividual("ConferenceProceedings", venueName + "_" + number);
 	    		}
 	            else {
-	            	numberInd = GetOrCreateIndividual("ConferenceProceedings", venueName + "_" + number);
+	            	numberInd = GetOrCreateIndividual("JournalVolume", venueName + "_" + number);
 				}
 	            	            
 	            ObjectProperty publishedIn = model.getObjectProperty(URI + "publishedin");
@@ -256,7 +265,13 @@ public class OntologyCreator {
             
             
             // Add author and writes relationship
-            Scanner sc2 = new Scanner(new File(basePath + "\\processed_data\\lead_authors_journal.csv"));
+            String fileNameAuthors = "lead_authors_journal";
+            
+            if (venue != "Journal") {
+            	fileNameAuthors = "lead_authors_conference";
+    		}
+            
+            Scanner sc2 = new Scanner(new File(basePath + "\\processed_data\\" + fileNameAuthors + ".csv"));
             sc2.useDelimiter(";");
             sc2.nextLine();
             
@@ -311,27 +326,16 @@ public class OntologyCreator {
     public static void main(String[] args) throws Exception {
         model.read(basePath + "\\SDM_LAB_3.owl");
 
-//        Scanner sc = new Scanner(new File("C:\\Users\\marcm\\OneDrive\\Desktop\\processed_data\\topics.csv"));
-//        sc.useDelimiter(",");
-//        sc.nextLine();
-//        while (sc.hasNext()) {
-//            String area = sc.nextLine();
-//            area = area.replace(" ", "_");
-//            Individual IndividualArea = model.createIndividual("http://www.gra.fo/schema/untitled-ekg#" + area , areaResource);
-//            IndividualArea.addRDFType(OWL2.NamedIndividual);
-//            model.createDatatypeProperty("http://www.gra.fo/schema/untitled-ekg#" + "JournalType");
-//            Property p = model.getDatatypeProperty("http://www.gra.fo/schema/untitled-ekg#" + "JournalType");
-//            confType.addProperty(p,  model.createLiteral( "CS" ));
-//        }
-//        sc.close();
-
-        addConferences();
+        String[] chairs = new String[5];
+        String[] editors  = new String[5];
+        
+        addAuthors(chairs, editors);
+        addConferences(chairs);
         addConferenceProcedings();
-        addJournals();
+        addJournals(editors);
         addJournalVolumes();
         addPapers("Journal");
         addPapers("Conference");
-        addAuthors();
 
         FileWriter myWriter = new FileWriter(basePath + "\\output.rdf");
         model.write(myWriter, "RDF/XML-ABBREV");
@@ -339,8 +343,54 @@ public class OntologyCreator {
     }
 
 
-	private static void addAuthors() {
-		// TODO Auto-generated method stub
+	private static void addAuthors(String[] chairs, String[] editors) throws FileNotFoundException {
 		
+		// Add author and writes relationship
+        String[] fileNameAuthors = {"lead_authors_journal", "lead_authors_conference"};              
+        Random r = new Random();
+        int low = 10;
+        int high = 100;
+        
+        int j = 0;
+        int k = 0;
+        for (int i = 0; i < fileNameAuthors.length; i++) {		
+	        Scanner sc2 = new Scanner(new File(basePath + "\\processed_data\\" + fileNameAuthors[i] + ".csv"));
+	        sc2.useDelimiter(";");
+	        sc2.nextLine();
+	        
+	        while (sc2.hasNext()) {
+	            
+	        	String[] authorValues = sc2.nextLine().split(";");
+	        	
+	        	//System.out.println(k);
+	        	
+	        	if (authorValues.length > 1)					
+	        	{
+		            String authorName = cleanStrings(authorValues[1]);            
+		            
+		            Resource authorRes = model.getResource(URI + "Author");
+		            Individual author = model.createIndividual(URI + authorName, authorRes);
+		            author.addRDFType(OWL2.NamedIndividual);
+		            
+		            Boolean isAuthority = r.nextInt(high-low) + low > 80;
+		            
+		            if(i == 1 && j <= 4 && isAuthority)
+		            {
+		            	chairs[j] = authorName;
+		            	j++;
+		            }
+		            
+		            if(i == 0 && j <= 4 && isAuthority)
+		            {
+		            	editors[j] = authorName;
+		            	j++;
+		            }
+		        }
+	            
+	            k++;
+	        }
+	        
+	        j=0;
+        }
 	}
 }
