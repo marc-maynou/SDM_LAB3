@@ -18,6 +18,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class OntologyCreator {
 
@@ -87,7 +89,7 @@ public class OntologyCreator {
            
             Individual journal = GetOrCreateIndividual("Journal", journalName);
             
-            Individual editor =  GetOrCreateIndividual("Chair", editors[rand.nextInt(5)]);
+            Individual editor =  GetOrCreateIndividual("Editor", editors[rand.nextInt(5)]);
             
             ObjectProperty handledBy = model.getObjectProperty(URI + "handledby");
             model.add(journal,handledBy,editor);
@@ -165,131 +167,138 @@ public class OntologyCreator {
         sc.nextLine();
         
         while (sc.hasNext()) {
-            String[] values = sc.nextLine().split(";");
-            String key = cleanStrings(values[0]);
-            
-            String venueName = cleanStrings(values[4]);
-            
-            String number = cleanStrings(values[5]); 
-            
-            String reviewers = "";
-            
-            if (venue != "Journal") {
-            	reviewers = cleanStrings(values[7]);
-    		}
-            else
+            String[] values = sc.nextLine().split(",");
+            if(values.length > 6)
             {
-            	reviewers = cleanStrings(values[8]);
-            }
-
-            List<String> paperTypes = Arrays.asList("ShortPaper", "FullPaper", "DemoPaper");
-            
-            if (venue != "Journal") {
-        		paperTypes.add("Poster");
-    		}
-            
-            Individual paperInd = GetOrCreateIndividual(paperTypes.get(rand.nextInt(3)), key);
-                        
-            // Submission Node
-            Individual submissionInd = GetOrCreateIndividual("AcceptedSubmission", "submission_" + key + "_accepted");
-            submissionInd.addRDFType(OWL2.NamedIndividual);
-            
-            // Relation Submission and Paper 
-            ObjectProperty includes = model.getObjectProperty(URI + "includes");
-            model.add(submissionInd,includes,paperInd);
-            
-            // Reviewers Node
-            if (!reviewers.isEmpty()) {			
-	            String[] reviewersValues = reviewers.split("\\|");
+            	String key = cleanStrings(values[0]);
+                       
+	            String venueName = cleanStrings(values[4]);
 	            
-	            String  reviewer1 = reviewersValues[0];
-	            String  reviewer2 = reviewersValues[1];
-	            String  reviewer3 = reviewersValues[2];	            	           
+	            String number = cleanStrings(values[5]); 
 	            
-	            Individual reviewersInd1 = GetOrCreateIndividual("Reviewers", reviewer1);
-	            Individual reviewersInd2 = GetOrCreateIndividual("Reviewers", reviewer2);
-	            Individual reviewersInd3 = GetOrCreateIndividual("Reviewers", reviewer3);
-	            
-	            Individual reviewInd1 = GetOrCreateIndividual("Review", "review1_" + reviewer1 + "_" + key  );
-	            Individual reviewInd2 = GetOrCreateIndividual("Review", "review2_" + reviewer2 + "_" + key  );
-	            Individual reviewInd3 = GetOrCreateIndividual("Review", "review3_" + reviewer3 + "_" + key  );
-	            
-	            ObjectProperty writesReview = model.getObjectProperty(URI + "writesreview");
-                
-	            model.add(reviewersInd1,writesReview,reviewInd1);
-	            model.add(reviewersInd2,writesReview,reviewInd2);
-	            model.add(reviewersInd3,writesReview,reviewInd3);
-	            
-	            ObjectProperty reviewedBy = model.getObjectProperty(URI + "reviewedby");
-
-	            model.add(submissionInd,reviewedBy,reviewInd1);
-	            model.add(submissionInd,reviewedBy,reviewInd2);	  
-	            model.add(submissionInd,reviewedBy,reviewInd3);
-                	            
-	            Individual decisionInd1 = GetOrCreateIndividual("Decision", "decision1_" + reviewer1 + "_" + key);
-	            Individual decisionInd2 = GetOrCreateIndividual("Decision", "decision2_" + reviewer2 + "_" + key);
-	            Individual decisionInd3 = GetOrCreateIndividual("Decision", "decision3_" + reviewer3 + "_" + key);
-	            
-	            ObjectProperty decides = model.getObjectProperty(URI + "decides");
-	            
-	            model.add(reviewInd1,decides,decisionInd1);
-	            model.add(reviewInd2,decides,decisionInd2);	  
-	            model.add(reviewInd3,decides,decisionInd3);
-	            
-	            ObjectProperty sendTo = model.getObjectProperty(URI + "sendto");
-	            
-	            Individual venueInd = null;
+	            String reviewers = "";
 	            
 	            if (venue != "Journal") {
-	            	venueInd = GetOrCreateIndividualConference(venueName);
+	            	reviewers = cleanStrings(values[7]);
 	    		}
-	            else {
-	            	venueInd = GetOrCreateIndividual(venue, venueName);
-				}
+	            else
+	            {
+	            	reviewers = cleanStrings(values[8]);
+	            }
+	
+	            List<String> paperTypes = Stream.of("ShortPaper", "FullPaper", "DemoPaper")
+	            	      .collect(Collectors.toList());
 	            
-	            model.add(submissionInd,sendTo,venueInd);	            
-
-	            Individual numberInd = null;
-	            		
 	            if (venue != "Journal") {
-	            	numberInd = GetOrCreateIndividual("ConferenceProceedings", venueName + "_" + number);
+	        		paperTypes.add("Poster");
 	    		}
-	            else {
-	            	numberInd = GetOrCreateIndividual("JournalVolume", venueName + "_" + number);
-				}
-	            	            
-	            ObjectProperty publishedIn = model.getObjectProperty(URI + "publishedin");
 	            
-	            model.add(venueInd,publishedIn,numberInd);	         	            
-            }
-            
-            
-            // Add author and writes relationship
-            String fileNameAuthors = "lead_authors_journal";
-            
-            if (venue != "Journal") {
-            	fileNameAuthors = "lead_authors_conference";
-    		}
-            
-            Scanner sc2 = new Scanner(new File(basePath + "\\processed_data\\" + fileNameAuthors + ".csv"));
-            sc2.useDelimiter(";");
-            sc2.nextLine();
-            
-            while (sc2.hasNext()) {
-                
-            	String[] authorValues = sc2.nextLine().split(";");
-                String keyAuthor = cleanStrings(authorValues[0]);
-                String authorName = cleanStrings(authorValues[1]);
-                System.out.println(key + " " + keyAuthor);
-                
-                if (keyAuthor.equals(key)) {
-                    Resource authorRes = model.getResource(URI + "Author");
-                    Individual author = model.createIndividual(URI + authorName, authorRes);
-                    author.addRDFType(OWL2.NamedIndividual);
-
-                    ObjectProperty writes = model.getObjectProperty(URI + "writes");
-                    model.add(author,writes,paperInd);
-                }
+	            Individual paperInd = GetOrCreateIndividual(paperTypes.get(rand.nextInt(3)), key);
+	                        
+	            // Submission Node
+	            Individual submissionInd = GetOrCreateIndividual("AcceptedSubmission", "submission_" + key + "_accepted");
+	            submissionInd.addRDFType(OWL2.NamedIndividual);
+	            
+	            // Relation Submission and Paper 
+	            ObjectProperty includes = model.getObjectProperty(URI + "includes");
+	            model.add(submissionInd,includes,paperInd);
+	            
+	            // Reviewers Node
+	            if (!reviewers.isEmpty()) {			
+		            String[] reviewersValues = reviewers.split("\\|");
+		            
+		            String  reviewer1 = reviewersValues[0];
+		            String  reviewer2 = reviewersValues[1];
+		            String  reviewer3 = reviewersValues[2];	            	           
+		            
+		            Individual reviewersInd1 = GetOrCreateIndividual("Reviewer", reviewer1);
+		            Individual reviewersInd2 = GetOrCreateIndividual("Reviewer", reviewer2);
+		            Individual reviewersInd3 = GetOrCreateIndividual("Reviewer", reviewer3);
+		            
+		            Individual reviewInd1 = GetOrCreateIndividual("Review", "review1_" + reviewer1 + "_" + key  );
+		            Individual reviewInd2 = GetOrCreateIndividual("Review", "review2_" + reviewer2 + "_" + key  );
+		            Individual reviewInd3 = GetOrCreateIndividual("Review", "review3_" + reviewer3 + "_" + key  );
+		            
+		            ObjectProperty writesReview = model.getObjectProperty(URI + "writesreview");
+	                
+		            model.add(reviewersInd1,writesReview,reviewInd1);
+		            model.add(reviewersInd2,writesReview,reviewInd2);
+		            model.add(reviewersInd3,writesReview,reviewInd3);
+		            
+		            ObjectProperty reviewedBy = model.getObjectProperty(URI + "reviewedby");
+	
+		            model.add(submissionInd,reviewedBy,reviewInd1);
+		            model.add(submissionInd,reviewedBy,reviewInd2);	  
+		            model.add(submissionInd,reviewedBy,reviewInd3);
+	                	            
+		            Individual decisionInd1 = GetOrCreateIndividual("Decision", "decision1_" + reviewer1 + "_" + key);
+		            Individual decisionInd2 = GetOrCreateIndividual("Decision", "decision2_" + reviewer2 + "_" + key);
+		            Individual decisionInd3 = GetOrCreateIndividual("Decision", "decision3_" + reviewer3 + "_" + key);
+		            
+		            ObjectProperty decides = model.getObjectProperty(URI + "decides");
+		            
+		            model.add(reviewInd1,decides,decisionInd1);
+		            model.add(reviewInd2,decides,decisionInd2);	  
+		            model.add(reviewInd3,decides,decisionInd3);
+		            
+		            ObjectProperty sendTo = model.getObjectProperty(URI + "sendto");
+		            
+		            Individual venueInd = null;
+		            
+		            if (venue != "Journal") {
+		            	venueInd = GetOrCreateIndividualConference(venueName);
+		    		}
+		            else {
+		            	venueInd = GetOrCreateIndividual(venue, venueName);
+					}
+		            
+		            model.add(submissionInd,sendTo,venueInd);	            
+	
+		            Individual numberInd = null;
+		            		
+		            if (venue != "Journal") {
+		            	numberInd = GetOrCreateIndividual("ConferenceProceedings", venueName + "_" + number);
+		    		}
+		            else {
+		            	numberInd = GetOrCreateIndividual("JournalVolume", venueName + "_" + number);
+					}
+		            	            
+		            ObjectProperty publishedIn = model.getObjectProperty(URI + "publishedin");
+		            
+		            model.add(venueInd,publishedIn,numberInd);	         	            
+	            }           
+	            
+	            // Add author and writes relationship
+	            String fileNameAuthors = "lead_authors_journal";
+	            
+	            if (venue != "Journal") {
+	            	fileNameAuthors = "lead_authors_conference";
+	    		}
+	            
+	            Scanner sc2 = new Scanner(new File(basePath + "\\processed_data\\" + fileNameAuthors + ".csv"));
+	            sc2.useDelimiter(";");
+	            sc2.nextLine();
+	            
+	            while (sc2.hasNext()) {
+	                
+	            	String[] authorValues = sc2.nextLine().split(";");
+	                
+	            	if(authorValues.length > 1)
+	            	{	            		            	
+		            	String keyAuthor = cleanStrings(authorValues[0]);
+		                String authorName = cleanStrings(authorValues[1]);
+		                // System.out.println(key + " " + keyAuthor);
+		                
+		                if (keyAuthor.equals(key)) {
+		                    Resource authorRes = model.getResource(URI + "Author");
+		                    Individual author = model.createIndividual(URI + authorName, authorRes);
+		                    author.addRDFType(OWL2.NamedIndividual);
+		
+		                    ObjectProperty writes = model.getObjectProperty(URI + "writes");
+		                    model.add(author,writes,paperInd);
+		                }
+	            	}
+	            }
             }
         }
         
