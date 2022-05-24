@@ -43,16 +43,17 @@ public class OntologyCreator {
     private static void createConference(String confName) {
         confName = cleanStrings(confName);
         String[] confTypes = {"Workshop", "Symposium", "ExpertGroup", "RegularConference"};
-
-        Resource confTypeRes = model.getResource(URI + confTypes[rand.nextInt(4)]);
-        Individual confType = model.createIndividual(URI + confName , confTypeRes);
+       
+        Individual confType = GetOrCreateIndividual(confTypes[rand.nextInt(4)], confName);
+        
         confType.addRDFType(OWL2.NamedIndividual);
     }
 
     private static void createJournal(String journalName) {
         journalName = cleanStrings(journalName);
-        Resource journalRes = model.getResource(URI + "Journal");
-        Individual journal = model.createIndividual(URI + journalName , journalRes);
+                       
+        Individual journal = GetOrCreateIndividual("Journal", journalName);
+        
         journal.addRDFType(OWL2.NamedIndividual);
     }
 
@@ -109,15 +110,16 @@ public class OntologyCreator {
             String city = values[2];
             conference = cleanStrings(conference);
             city = cleanStrings(city);
-
-
-            Resource confProRes = model.getResource(URI + "ConferenceProceedings");
-            Individual confProc = model.createIndividual(URI + conference + "_" + year, confProRes);
+            
+            Individual confProc = GetOrCreateIndividual("ConferenceProceedings", conference + "_" + year);
+            
             confProc.addRDFType(OWL2.NamedIndividual);
 
             //Add proceedingsOf
             ObjectProperty p = model.getObjectProperty(URI + "proceedingsof");
-            Individual conferenceInd = model.getIndividual( URI + conference);
+            
+            Individual conferenceInd = model.getIndividual( URI + conference);                      
+            
             if (conferenceInd == null) {
                 createConference(conference);
                 conferenceInd = model.getIndividual( URI + conference);
@@ -138,10 +140,8 @@ public class OntologyCreator {
             String volume = values[1];
             journal = cleanStrings(journal);
             volume = cleanStrings(volume);
-
-            Resource volumeRes = model.getResource(URI + "JournalVolume");
-            Individual volumeInd = model.createIndividual(URI + journal + "_" + volume, volumeRes);
-            volumeInd.addRDFType(OWL2.NamedIndividual);
+            
+            Individual volumeInd = GetOrCreateIndividual("JournalVolume", journal + "_" + volume);
 
             //Add volumeof
             ObjectProperty p = model.getObjectProperty(URI + "volumeof");
@@ -361,7 +361,6 @@ public class OntologyCreator {
         int high = 100;
         
         int j = 0;
-        int k = 0;
         for (int i = 0; i < fileNameAuthors.length; i++) {		
 	        Scanner sc2 = new Scanner(new File(basePath + "\\processed_data\\" + fileNameAuthors[i] + ".csv"));
 	        sc2.useDelimiter(";");
@@ -395,8 +394,6 @@ public class OntologyCreator {
 		            	j++;
 		            }
 		        }
-	            
-	            k++;
 	        }
 	        
 	        j=0;
