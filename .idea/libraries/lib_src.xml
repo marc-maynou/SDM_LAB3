@@ -5,6 +5,7 @@
     </CLASSES>
     <JAVADOC />
     <SOURCES>
+      <root url="file://$PROJECT_DIR$/apache-jena-4.4.0/src-examples" />
       <root url="file://$PROJECT_DIR$/apache-jena-4.4.0/lib-src" />
     </SOURCES>
     <jarDirectory url="file://$PROJECT_DIR$/apache-jena-4.4.0/lib" recursive="false" />
