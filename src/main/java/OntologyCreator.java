@@ -193,7 +193,7 @@ public class OntologyCreator {
 
 		while (sc.hasNext()) {
 			String[] values = sc.nextLine().split(",");
-			if(values.length > 6) {
+			if(values.length >= 9) {
 				String key = cleanStrings(values[0]);
 				String venueName = cleanStrings(values[4]);
 				String number = cleanStrings(values[5]);
@@ -287,17 +287,17 @@ public class OntologyCreator {
 
 					AddDataProperty(submissionInd, "submissionid", key);
 
-					AddDataProperty(decisionInd1, "verdict", "Accepted");
-					AddDataProperty(decisionInd2, "verdict", "Accepted");
-					AddDataProperty(decisionInd3, "verdict", "Accepted");
+					AddDataProperty(decisionInd1, "verdict", "accepted");
+					AddDataProperty(decisionInd2, "verdict", "accepted");
+					AddDataProperty(decisionInd3, "verdict", "accepted");
 
 					AddDataProperty(reviewersInd1, "reviewername", reviewer1);
 					AddDataProperty(reviewersInd2, "reviewername", reviewer2);
 					AddDataProperty(reviewersInd3, "reviewername", reviewer3);
 
 					AddDataProperty(reviewInd1, "reviewid", "review1_" + reviewer1 + "_" + key);
-					AddDataProperty(reviewInd2, "reviewid", "review1_" + reviewer2 + "_" + key);
-					AddDataProperty(reviewInd3, "reviewida", "review1_" + reviewer3 + "_" + key);
+					AddDataProperty(reviewInd2, "reviewid", "review2_" + reviewer2 + "_" + key);
+					AddDataProperty(reviewInd3, "reviewid", "review3_" + reviewer3 + "_" + key);
 				}           
 
 				// Add author and writes relationship
@@ -333,7 +333,7 @@ public class OntologyCreator {
 
 	private static void AddDataProperty(Individual individual, String dataProperty, String value) {
 		DatatypeProperty property = model.getDatatypeProperty(URI + dataProperty);
-		model.add(individual, property, value);
+		model.add(individual, property, cleanStrings(value));
 	}
 
 	public static Individual GetOrCreateIndividual(String resourceName, String individualName) {
@@ -388,7 +388,7 @@ public class OntologyCreator {
 		sc2.nextLine();
 		int i = 0;
 		while (sc2.hasNext()) {
-			topics[i] = sc2.nextLine().trim();
+			topics[i] = cleanStrings(sc2.nextLine().trim().replace(" ", ""));
 			i++;
 		}		
 	}
@@ -409,7 +409,7 @@ public class OntologyCreator {
 			while (sc2.hasNext()) {
 				String[] authorValues = sc2.nextLine().split(";");
 
-				if (authorValues.length > 1) {
+				if (authorValues.length == 4) {
 					String authorName = cleanStrings(authorValues[1]);            
 					String employer = cleanStrings(authorValues[2]);            
 					String country = cleanStrings(authorValues[3]);            
