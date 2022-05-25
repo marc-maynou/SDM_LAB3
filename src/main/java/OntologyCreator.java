@@ -69,10 +69,12 @@ public class OntologyCreator {
 			ObjectProperty handledBy = model.getObjectProperty(URI + "handledby");
 			model.add(confType,handledBy,chair);
 
-			Individual area =  GetOrCreateIndividual("Area", topics[rand.nextInt(5)]);            
+			String areaname =  topics[rand.nextInt(4)];
+			Individual area =  GetOrCreateIndividual("Area", areaname);            
 			ObjectProperty relatedTo = model.getObjectProperty(URI + "relatedto");
 			model.add(confType,relatedTo,area);
 
+			AddDataProperty(area, "areaname", areaname);
 			AddDataProperty(confType, "venuename", confName);
 			AddDataProperty(chair, "authorityname", authorityname);
 		}
@@ -96,10 +98,12 @@ public class OntologyCreator {
 			ObjectProperty handledBy = model.getObjectProperty(URI + "handledby");
 			model.add(journal,handledBy,editor);
 
-			Individual area =  GetOrCreateIndividual("Area", topics[rand.nextInt(5)]);            
+			String areaname =  topics[rand.nextInt(4)];
+			Individual area =  GetOrCreateIndividual("Area", areaname);            
 			ObjectProperty relatedTo = model.getObjectProperty(URI + "relatedto");
 			model.add(journal,relatedTo,area);
 
+			AddDataProperty(area, "areaname", areaname);
 			AddDataProperty(journal, "venuename", journalName);
 			AddDataProperty(editor, "authorityname", authorityname);
 		}
@@ -200,8 +204,11 @@ public class OntologyCreator {
 
 				// Data Properties
 				String title = cleanStrings(values[1]);
-				String isbn = cleanStrings(values[7]);
+				String isbn = "";
 
+				if (venue != "Journal") isbn = cleanStrings(values[7]);
+				else cleanStrings(values[6]); 
+					
 				String reviewers = "";
 				if (venue != "Journal") reviewers = cleanStrings(values[7]);
 				else reviewers = cleanStrings(values[8]);
@@ -222,12 +229,16 @@ public class OntologyCreator {
 				// Relation Paper and Area
 				ObjectProperty hasKeyWords = model.getObjectProperty(URI + "haskeywords");
 
-				Individual area1 =  GetOrCreateIndividual("Area", topics[rand.nextInt(5)]);            
+				String areaname1 =  topics[rand.nextInt(4)];
+				Individual area1 =  GetOrCreateIndividual("Area", areaname1);            
 				model.add(paperInd,hasKeyWords,area1);
 
-				Individual area2 =  GetOrCreateIndividual("Area", topics[rand.nextInt(5)]);            
+				String areaname2 =  topics[rand.nextInt(4)];
+				Individual area2 =  GetOrCreateIndividual("Area", areaname2);            
 				model.add(paperInd,hasKeyWords,area2);
 
+				AddDataProperty(area1, "areaname", areaname1);
+				AddDataProperty(area2, "areaname", areaname2);
 				AddDataProperty(paperInd, "key", key);
 				AddDataProperty(paperInd, "isbn", isbn);
 				AddDataProperty(paperInd, "title", title);	            	           
@@ -332,7 +343,7 @@ public class OntologyCreator {
 	}
 
 	private static void AddDataProperty(Individual individual, String dataProperty, String value) {
-		DatatypeProperty property = model.getDatatypeProperty(URI + dataProperty);
+		DatatypeProperty property = model.getDatatypeProperty(URI + dataProperty);		
 		model.add(individual, property, cleanStrings(value));
 	}
 
@@ -377,7 +388,6 @@ public class OntologyCreator {
 
 		FileWriter myWriter = new FileWriter(basePath + "\\output.rdf");
 		model.write(myWriter, "RDF/XML-ABBREV");
-		Integer X = 1;
 		myWriter.close();
 	}
 

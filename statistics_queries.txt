@@ -1,0 +1,14 @@
+PREFIX : <http://www.gra.fo/schema/SDM_LAB_3#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>  
+# select (count(?class) AS ?n_class) {?class a owl:Class.}  | 25
+# select (count (?author) AS ?n_author)  where {?author a :Author.} | 4036
+# select (count (?paper) AS ?n_paper)  where {?paper a :Paper.} | 653
+# select (count (?conference) AS ?n_conference)  where {?conference a :Conference.} | 5303
+# select (count (?journal) AS ?n_journal)  where {?journal a :Journal.} | 6765
+# select (count (?venues) AS ?n_venues)  where {?venues a :Venues.} | 12067
+# select (count (?area) AS ?n_area)  where {?area a :Area.} | 5
+# select (count (?editor) AS ?n_editor)  where {?editor a :Editor.} | 11
+# select (count (?chair) AS ?n_chair)  where {?chair a :Chair.} | 12
+# select (count (?publication) AS ?n_publication)  where {?publication a :Publication.} | 6930
+# select (count (?reviewer) AS ?n_reviewer)  where {?reviewer a :Reviewer.} | 1814
+# select (count (?submission) AS ?n_submission)  where {?submission a :Submission.} | 1180

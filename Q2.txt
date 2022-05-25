@@ -1,0 +1,6 @@
+PREFIX : <http://www.gra.fo/schema/SDM_LAB_3#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+# all properties whose domain is Author
+select ?p where {
+	?p rdfs:domain :Author.
+} limit 100

@@ -1,0 +1,6 @@
+PREFIX : <http://www.gra.fo/schema/SDM_LAB_3#>
+# all authors
+select ?name where {
+	?author a :Author.
+    ?author :authorname ?name .
+} limit 100

@@ -1,0 +1,39 @@
+<owl:DatatypeProperty rdf:about="http://www.gra.fo/schema/SDM_LAB_3#areaname">
+
+Reviewer
+<owl:DatatypeProperty rdf:about="http://www.gra.fo/schema/SDM_LAB_3#reviewername">
+
+Review
+<owl:DatatypeProperty rdf:about="http://www.gra.fo/schema/SDM_LAB_3#reviewid">
+
+Paper
+<owl:DatatypeProperty rdf:about="http://www.gra.fo/schema/SDM_LAB_3#key">
+<owl:DatatypeProperty rdf:about="http://www.gra.fo/schema/SDM_LAB_3#isbn">
+<owl:DatatypeProperty rdf:about="http://www.gra.fo/schema/SDM_LAB_3#title">
+
+venue/conf/journal
+<owl:DatatypeProperty rdf:about="http://www.gra.fo/schema/SDM_LAB_3#venuename">
+
+Author
+<owl:DatatypeProperty rdf:about="http://www.gra.fo/schema/SDM_LAB_3#authorname">
+<owl:DatatypeProperty rdf:about="http://www.gra.fo/schema/SDM_LAB_3#employer">
+<owl:DatatypeProperty rdf:about="http://www.gra.fo/schema/SDM_LAB_3#country">
+
+Authority
+<owl:DatatypeProperty rdf:about="http://www.gra.fo/schema/SDM_LAB_3#authorityname">
+
+Conf Procd
+<owl:DatatypeProperty rdf:about="http://www.gra.fo/schema/SDM_LAB_3#city">
+
+Journal Vol
+<owl:DatatypeProperty rdf:about="http://www.gra.fo/schema/SDM_LAB_3#number">
+
+Publication
+<owl:DatatypeProperty rdf:about="http://www.gra.fo/schema/SDM_LAB_3#publicationname">
+<owl:DatatypeProperty rdf:about="http://www.gra.fo/schema/SDM_LAB_3#publicationyear">
+
+Submission
+<owl:DatatypeProperty rdf:about="http://www.gra.fo/schema/SDM_LAB_3#submissionid">
+
+Decision
+<owl:DatatypeProperty rdf:about="http://www.gra.fo/schema/SDM_LAB_3#verdict">

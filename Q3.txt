@@ -1,0 +1,8 @@
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX : <http://www.gra.fo/schema/SDM_LAB_3#>
+#  properties whose domain is either Conference or Journal
+select distinct ?p where {
+    {?p rdfs:domain :Conference}
+    UNION
+    {?p rdfs:domain :Journal}
+} limit 100 
